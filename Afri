@@ -1,0 +1,415 @@
+import React, { useState, useEffect } from 'react';
+import { Calendar, Heart, Apple, Activity, MessageCircle, User, Home, TrendingUp, Clock, MapPin, Star, CheckCircle } from 'lucide-react';
+
+const AfriCycleApp = () => {
+  const [activeTab, setActiveTab] = useState('home');
+  const [cycleData, setCycleData] = useState({
+    lastPeriod: '2024-08-15',
+    cycleLength: 28,
+    currentDay: 12
+  });
+  const [symptoms, setSymptoms] = useState([]);
+  const [chatMessages, setChatMessages] = useState([
+    {
+      id: 1,
+      sender: 'assistant',
+      message: 'Habari! I\'m Mama Afya, your personal health assistant. How can I help you today?',
+      timestamp: new Date()
+    }
+  ]);
+  const [userLocation, setUserLocation] = useState('Kenya');
+
+  // Calculate cycle phase
+  const getCyclePhase = (day) => {
+    if (day >= 1 && day <= 5) return { phase: 'Menstrual', color: 'bg-red-500' };
+    if (day >= 6 && day <= 13) return { phase: 'Follicular', color: 'bg-green-500' };
+    if (day >= 14 && day <= 16) return { phase: 'Ovulation', color: 'bg-yellow-500' };
+    return { phase: 'Luteal', color: 'bg-purple-500' };
+  };
+
+  const currentPhase = getCyclePhase(cycleData.currentDay);
+
+  // African foods database
+  const africanFoods = {
+    Kenya: [
+      { name: 'Ugali', benefits: 'High in carbs, gives energy', phase: 'all', price: 'KSH 20' },
+      { name: 'Sukuma Wiki', benefits: 'Iron-rich, reduces cramps', phase: 'menstrual', price: 'KSH 30' },
+      { name: 'Sweet Potatoes', benefits: 'Vitamin A, reduces bloating', phase: 'luteal', price: 'KSH 50' },
+      { name: 'Githeri', benefits: 'Protein + fiber, sustained energy', phase: 'follicular', price: 'KSH 40' }
+    ],
+    Nigeria: [
+      { name: 'Egusi Soup', benefits: 'High protein, iron-rich', phase: 'menstrual', price: '₦200' },
+      { name: 'Plantain', benefits: 'Potassium, reduces cramps', phase: 'all', price: '₦100' },
+      { name: 'Bitter Leaf', benefits: 'Detox, hormonal balance', phase: 'luteal', price: '₦150' }
+    ]
+  };
+
+  // Exercise recommendations
+  const exercises = [
+    {
+      name: 'Traditional Ngoma Dance',
+      phase: 'follicular',
+      duration: '15 mins',
+      equipment: 'None',
+      benefits: 'Cardio, cultural connection'
+    },
+    {
+      name: 'Gentle Yoga Flow',
+      phase: 'menstrual',
+      duration: '10 mins',
+      equipment: 'Mat/towel',
+      benefits: 'Reduces cramps, relaxation'
+    },
+    {
+      name: 'Walking Meditation',
+      phase: 'luteal',
+      duration: '20 mins',
+      equipment: 'None',
+      benefits: 'Mood balance, light exercise'
+    }
+  ];
+
+  const addSymptom = (symptom) => {
+    setSymptoms([...symptoms, { 
+      symptom, 
+      date: new Date().toISOString().split('T')[0],
+      severity: Math.floor(Math.random() * 5) + 1
+    }]);
+  };
+
+  const sendMessage = (message) => {
+    const newMessage = {
+      id: chatMessages.length + 1,
+      sender: 'user',
+      message,
+      timestamp: new Date()
+    };
+    
+    setChatMessages([...chatMessages, newMessage]);
+    
+    // Simulate AI response
+    setTimeout(() => {
+      let response = '';
+      if (message.toLowerCase().includes('cramp')) {
+        response = 'For menstrual cramps, I recommend trying sukuma wiki (kale) - it\'s rich in iron and magnesium. Also try gentle stretching or traditional dances like Chakacha for natural pain relief.';
+      } else if (message.toLowerCase().includes('food')) {
+        response = `Based on your current ${currentPhase.phase.toLowerCase()} phase, I recommend foods like ${africanFoods[userLocation]?.[0]?.name || 'leafy greens'} which are locally available and affordable.`;
+      } else {
+        response = 'Thank you for sharing. Remember, I\'m here to provide general wellness guidance. For serious concerns, please consult with a healthcare professional. What specific area would you like help with today?';
+      }
+      
+      setChatMessages(prev => [...prev, {
+        id: prev.length + 1,
+        sender: 'assistant',
+        message: response,
+        timestamp: new Date()
+      }]);
+    }, 1000);
+  };
+
+  const HomeScreen = () => (
+    <div className="p-6 space-y-6">
+      <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white p-6 rounded-xl">
+        <h2 className="text-2xl font-bold mb-2">Welcome back, Sister!</h2>
+        <p className="opacity-90">You're in your {currentPhase.phase} phase</p>
+        <div className="mt-4 flex items-center space-x-2">
+          <div className={`w-4 h-4 rounded-full ${currentPhase.color}`}></div>
+          <span>Day {cycleData.currentDay} of your cycle</span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <Heart className="w-8 h-8 text-red-500 mb-2" />
+          <h3 className="font-semibold">Next Period</h3>
+          <p className="text-sm text-gray-600">In 16 days</p>
+        </div>
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <TrendingUp className="w-8 h-8 text-green-500 mb-2" />
+          <h3 className="font-semibold">Fertility</h3>
+          <p className="text-sm text-gray-600">Low today</p>
+        </div>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <h3 className="font-semibold mb-3">Today's Recommendations</h3>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2 p-2 bg-blue-50 rounded">
+            <Apple className="w-5 h-5 text-blue-600" />
+            <span className="text-sm">Try sukuma wiki for iron boost</span>
+          </div>
+          <div className="flex items-center space-x-2 p-2 bg-green-50 rounded">
+            <Activity className="w-5 h-5 text-green-600" />
+            <span className="text-sm">15min gentle yoga recommended</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const CycleTracker = () => (
+    <div className="p-6 space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold mb-2">Cycle Tracker</h2>
+        <div className="relative w-48 h-48 mx-auto">
+          <div className="w-full h-full border-4 border-gray-200 rounded-full relative">
+            <div 
+              className={`absolute w-4 h-4 ${currentPhase.color} rounded-full -top-2 -right-2`}
+              style={{
+                transform: `rotate(${(cycleData.currentDay / 28) * 360}deg)`,
+                transformOrigin: '100px 100px'
+              }}
+            ></div>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center flex-col">
+            <span className="text-3xl font-bold">{cycleData.currentDay}</span>
+            <span className="text-sm text-gray-600">Day</span>
+          </div>
+        </div>
+        <p className="mt-4 text-lg font-semibold">{currentPhase.phase} Phase</p>
+      </div>
+
+      <div className="bg-white p-4 rounded-lg shadow-sm border">
+        <h3 className="font-semibold mb-3">Log Symptoms</h3>
+        <div className="grid grid-cols-2 gap-2">
+          {['Cramps', 'Headache', 'Bloating', 'Mood swings', 'Fatigue', 'Nausea'].map(symptom => (
+            <button
+              key={symptom}
+              onClick={() => addSymptom(symptom)}
+              className="p-2 text-sm border rounded hover:bg-gray-50"
+            >
+              {symptom}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {symptoms.length > 0 && (
+        <div className="bg-white p-4 rounded-lg shadow-sm border">
+          <h3 className="font-semibold mb-3">Recent Symptoms</h3>
+          <div className="space-y-2">
+            {symptoms.slice(-3).map((item, idx) => (
+              <div key={idx} className="flex justify-between text-sm">
+                <span>{item.symptom}</span>
+                <span className="text-gray-600">{item.date}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const NutritionGuide = () => (
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Nutrition Guide</h2>
+        <div className="flex items-center space-x-2 text-sm text-gray-600">
+          <MapPin className="w-4 h-4" />
+          <span>{userLocation}</span>
+        </div>
+      </div>
+
+      <div className="bg-gradient-to-r from-green-400 to-blue-500 text-white p-4 rounded-xl">
+        <h3 className="font-bold mb-2">Phase-Based Nutrition</h3>
+        <p className="text-sm opacity-90">
+          Your {currentPhase.phase.toLowerCase()} phase needs specific nutrients
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <h3 className="font-semibold">Recommended Local Foods</h3>
+        {(africanFoods[userLocation] || africanFoods.Kenya).map((food, idx) => (
+          <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <h4 className="font-semibold">{food.name}</h4>
+                <p className="text-sm text-gray-600 mt-1">{food.benefits}</p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    {food.phase === 'all' ? 'All phases' : food.phase}
+                  </span>
+                  <span className="text-sm font-semibold text-green-600">{food.price}</span>
+                </div>
+              </div>
+              <Star className="w-5 h-5 text-yellow-500" />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+        <h4 className="font-semibold text-yellow-800 mb-2">Cultural Tip</h4>
+        <p className="text-sm text-yellow-700">
+          Traditional fermented porridge (uji) made with millet provides probiotics and steady energy during your cycle.
+        </p>
+      </div>
+    </div>
+  );
+
+  const ExerciseGuide = () => (
+    <div className="p-6 space-y-6">
+      <h2 className="text-2xl font-bold">Exercise Guide</h2>
+      
+      <div className="bg-gradient-to-r from-purple-400 to-pink-500 text-white p-4 rounded-xl">
+        <h3 className="font-bold mb-2">Phase-Appropriate Workouts</h3>
+        <p className="text-sm opacity-90">
+          Exercises tailored for your {currentPhase.phase.toLowerCase()} phase
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        {exercises.map((exercise, idx) => (
+          <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border">
+            <div className="flex justify-between items-start mb-2">
+              <h4 className="font-semibold">{exercise.name}</h4>
+              <div className="flex items-center space-x-1">
+                <Clock className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-600">{exercise.duration}</span>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">{exercise.benefits}</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                {exercise.equipment}
+              </span>
+              <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                Best for {exercise.phase}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+        <h4 className="font-semibold text-blue-800 mb-2">Cultural Exercises</h4>
+        <div className="space-y-2">
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-4 h-4 text-green-600" />
+            <span className="text-sm">Traditional dances improve circulation</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <CheckCircle className="w-4 h-4 text-green-600" />
+            <span className="text-sm">Walking meditation practiced in many African cultures</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const AIAssistant = () => {
+    const [newMessage, setNewMessage] = useState('');
+
+    return (
+      <div className="p-6 flex flex-col h-screen-nav">
+        <h2 className="text-2xl font-bold mb-4">Mama Afya Assistant</h2>
+        
+        <div className="flex-1 bg-white rounded-lg shadow-sm border p-4 overflow-y-auto">
+          <div className="space-y-4">
+            {chatMessages.map((msg) => (
+              <div 
+                key={msg.id} 
+                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
+                  msg.sender === 'user' 
+                    ? 'bg-blue-500 text-white' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  <p className="text-sm">{msg.message}</p>
+                  <p className="text-xs opacity-70 mt-1">
+                    {msg.timestamp.toLocaleTimeString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 flex space-x-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && newMessage.trim() && (sendMessage(newMessage), setNewMessage(''))}
+            placeholder="Ask Mama Afya anything..."
+            className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            onClick={() => newMessage.trim() && (sendMessage(newMessage), setNewMessage(''))}
+            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Send
+          </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-2">
+          <button
+            onClick={() => sendMessage('I have menstrual cramps, what should I eat?')}
+            className="p-2 text-sm bg-gray-100 rounded hover:bg-gray-200"
+          >
+            Cramp relief foods
+          </button>
+          <button
+            onClick={() => sendMessage('What exercises are safe during my period?')}
+            className="p-2 text-sm bg-gray-100 rounded hover:bg-gray-200"
+          >
+            Period exercises
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderScreen = () => {
+    switch(activeTab) {
+      case 'home': return <HomeScreen />;
+      case 'cycle': return <CycleTracker />;
+      case 'nutrition': return <NutritionGuide />;
+      case 'exercise': return <ExerciseGuide />;
+      case 'chat': return <AIAssistant />;
+      default: return <HomeScreen />;
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-pink-600 to-purple-700 text-white p-4">
+        <h1 className="text-2xl font-bold">AfriCycle</h1>
+        <p className="text-sm opacity-90">Your AI-Powered Health Companion</p>
+      </div>
+
+      {/* Main Content */}
+      <div className="pb-20">
+        {renderScreen()}
+      </div>
+
+      {/* Bottom Navigation */}
+      <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-md bg-white border-t">
+        <div className="flex justify-around py-2">
+          {[
+            { id: 'home', icon: Home, label: 'Home' },
+            { id: 'cycle', icon: Calendar, label: 'Cycle' },
+            { id: 'nutrition', icon: Apple, label: 'Nutrition' },
+            { id: 'exercise', icon: Activity, label: 'Exercise' },
+            { id: 'chat', icon: MessageCircle, label: 'AI Chat' }
+          ].map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`flex flex-col items-center p-2 ${
+                activeTab === id ? 'text-purple-600' : 'text-gray-500'
+              }`}
+            >
+              <Icon className="w-6 h-6" />
+              <span className="text-xs mt-1">{label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AfriCycleApp;
